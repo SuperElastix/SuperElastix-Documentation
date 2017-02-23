@@ -20,3 +20,8 @@ The following sequence diagrams show the order of function calls of each mode of
 .. image:: images/SeqDiagSelxFilterUnknownTypes.png
 
 Note that these are simplified diagrams and may not reflect all details and naming as found in the source code.
+
+User Component Creation
+-----------------------
+
+A SuperElastix Component consists of
