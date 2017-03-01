@@ -25,3 +25,71 @@ User Component Creation
 -----------------------
 
 A SuperElastix Component consists of
+
+.. graphviz::
+
+   digraph {
+      "From" -> "To";
+   }
+
+.. uml::
+
+  @startuml
+  Alice -> Bob: test
+  @enduml 
+
+.. uml::
+
+      @startuml
+      
+      'style options 
+      skinparam monochrome true
+      skinparam circledCharacterRadius 0
+      skinparam circledCharacterFontSize 0
+      skinparam classAttributeIconSize 0
+      hide empty members
+      
+	  class CustomComponent{
+	  type_A method_A(args)
+	  type_B method_B(args)
+	  void set(I_C*)
+	  void set(I_D*)
+	  bool MeetsCriterion()
+	  }
+	  
+      class SuperElastixComponent< "<Providing<I_A, I_B, ... >, Accepting<I_C, I_D, ... > >" > {
+      }
+
+      package Providing {
+      class I_A << interface >> {
+	  type_A method_A(args)
+	  }
+      class I_B << interface >> {
+	  type_B method_B(args)
+      }
+      }
+	  
+      package Accepting {	  
+      class "Acceptor<I_C>" << interface >> {
+      void set(I_C*)
+      }
+	  
+      class "Acceptor<I_D>" << interface >> {
+      void set(I_D*)
+      }
+	  }
+	  
+	  class ComponentBase {
+	  bool MeetsCriterion()
+	  }
+	  
+      ComponentBase <|-- SuperElastixComponent
+      I_A <|-- SuperElastixComponent
+      I_B <|-- SuperElastixComponent
+      "Acceptor<I_C>" <|-- SuperElastixComponent
+      "Acceptor<I_D>" <|-- SuperElastixComponent
+      
+      SuperElastixComponent <|-- CustomComponent 
+      @enduml
+
+	  
