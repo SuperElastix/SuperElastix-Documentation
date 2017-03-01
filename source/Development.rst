@@ -50,37 +50,39 @@ A SuperElastix Component consists of
       hide empty members
       
 	  class CustomComponent{
-	  type_A method_A(args)
-	  type_B method_B(args)
-	  void set(I_C*)
-	  void set(I_D*)
+	  type_A Method_A(args)
+	  type_B Method_B(args)
+	  void Set(I_C*)
+	  void Set(I_D*)
 	  bool MeetsCriterion()
 	  }
 	  
       class SuperElastixComponent< "<Providing<I_A, I_B, ... >, Accepting<I_C, I_D, ... > >" > {
+	  "HandShakeMethods"()
       }
 
       package Providing {
       class I_A << interface >> {
-	  type_A method_A(args)
+	  type_A Method_A(args)
 	  }
       class I_B << interface >> {
-	  type_B method_B(args)
+	  type_B Method_B(args)
       }
       }
 	  
       package Accepting {	  
       class "Acceptor<I_C>" << interface >> {
-      void set(I_C*)
+      void Set(I_C*)
       }
 	  
       class "Acceptor<I_D>" << interface >> {
-      void set(I_D*)
+      void Set(I_D*)
       }
 	  }
 	  
 	  class ComponentBase {
 	  bool MeetsCriterion()
+	  "HandShakeMethods"()
 	  }
 	  
       ComponentBase <|-- SuperElastixComponent
