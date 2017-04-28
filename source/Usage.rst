@@ -42,4 +42,10 @@ These four scripts run the Demo experiments as described in [1]_:
 Library use
 -----------
 
-- The SuperElastix commandline tool in :code:`<source-path>\Applications` serves as an example of the usage of the SuperElastix library.
+SuperElastix supports two ways of library usage: 
+
+- :code:`SuperElastixFilter`: A precompiled SuperElastixFilter library loaded with a default set of components. To link against this library a small number of header files are needed. Compilation time is limited, since most functionality is precompiled and not exposed during compilation of the application (pimpl idiom)
+
+- :code:`SuperElastixCustomComponents<ComponentTypeList<...>>`: A templated SuperElastixFilter class with a user selectable set of components. The set of components can be of any number and of any variation of each component its template arguments, e.g. dimensionality, pixeltype or other template arguments. New user-developed components can be added to the ComponentTypeList and compiled into the filter without the need of changing any of the SuperElastix source codes. Compilation is longer and it requires the project to include all header of SuperElastix and the selected components. 
+
+The SuperElastix commandline tool in :code:`<source-path>\Applications` serves as an example of the usage of the SuperElastix library. [in progress]

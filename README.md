@@ -1,13 +1,13 @@
 Documentation
 =============
 
-This is the source code for the project documentation at [simpleelastix.readthedocs.org](http://simpleelastix.readthedocs.org/). The documentation is updated on every commit to the `Github repository <https://github.com/kaspermarstal/SuperElastix>`_. You can build it locally by installing sphinx: 
+This is the source code for the project documentation at [superelastix.readthedocs.org](http://superelastix.readthedocs.org/). The documentation is updated on every commit to the `Github repository <https://github.com/SuperElastix/SuperElastix-Documentation>`_. You can build it locally by installing sphinx: 
 
 ```bash
 $ pip install sphinx
 ```
 
-and run the following make command in `Documentation/`:
+and run the following make command:
 
 ```bash
 $ make html

@@ -36,9 +36,22 @@ if not is_rtd:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.mathjax'
+    'sphinx.ext.mathjax',
+    'sphinx.ext.ifconfig'
 ]
-
+if not is_rtd:
+    extensions += [
+	'sphinxcontrib.plantuml',
+	'sphinx.ext.graphviz'
+    ]
+    
+def setup(app):
+    print("setup called")
+    print(app)
+    if is_rtd:
+        app.add_config_value('renderuml', 'False', 'env')
+    else:
+        app.add_config_value('renderuml', 'True', 'env')
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -362,3 +375,6 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+# used if not is_rtd:
+plantuml = 'java -jar ../utils/plantuml.jar'
