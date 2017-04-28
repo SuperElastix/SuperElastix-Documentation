@@ -14,8 +14,8 @@ The SuperElastixFilter is designed to be part of an itk pipeline such that it ca
 However, unlike common itk filters, the inputs and outputs of the SuperElastixFilter are typically unknown at compile time, because they depend on the Blueprint configuration describing the actual algorithm to execute. This complicates the setup of a pipeline, since up and downstream itk filters are typically templated over their datatypes.
 To stay as close as possible to the itk philosophy, the SuperElastixFilter supports 2 modes of operation:
 
-- *Application embedding*: at compile-time the inputs and outputs are known. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: ImageFileReader<KnownImageType>::Pointer my_writer->SetInput(selxFilter->GetOutput<KnownImageType>(identifier));
-- *Commandline tool*: at compile time the inputs and outputs are unknown. The class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface cannot instantiate the readers or writers because of their templated types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, call the appropriate reader of writer (by use of polymorphism). In this mode, it is required to set the Blueprint prior to request and connect readers or writers.
+- *Known input and output types at compilation time*: E.g. an application embedding a dedicated registration task. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: :code:`ImageFileWriter<KnownImageType>::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput<KnownImageType>(identifier))`.
+- *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers.
 
 The following sequence diagrams show the order of function calls of each mode of operation.
 
@@ -39,16 +39,53 @@ In the "Precompiled" library this database is populated with a predefined list o
 
 In the "Templated" library the database of components can be populated by the user at compilation time by passing the component classes as template arguments. Applications using this library need access to all of SuperElastix internal source and header files at compilation time. This approach provides the flexibility to compile an instance of the SuperElastix ITK filter with, for instance, a sub- or superset of the default components, a set of components with exotic dimensionality or pixel types or even with third party components. Compiling the SuperElastix ITK filter with a small set of components is typically done in our Unit tests when testing a specific component or combination of components. Adding a third-party component to SuperElastix via template arguments does not require any modification of the source code files of the SuperElastixFilter. A third-party component can adhere to the existing already defined interfaces classes, but op top of that it can also define new interface classes.
 
-
+.. ifconfig:: renderuml is 'True'
+    
+    .. uml::
+    
+          @startuml
+          
+          'style options 
+          skinparam monochrome true
+          skinparam circledCharacterRadius 0
+          skinparam circledCharacterFontSize 0
+          skinparam classAttributeIconSize 0
+          hide empty members
+          
+          class SuperElastixFilterCustomComponents< "<CompontentA<> ... CompontentZ<>>" > {
+          networkBuilderBase* m_NetworkBuilder = networkBuilder< CompontentA<>, ... , CompontentZ<> >
+          }
+          
+          class SuperElastixFilter {
+          networkBuilderBase* m_NetworkBuilder = networkBuilder< DefaultComponentList ...  >
+          "All ItkFilterMethods()"
+          }
+          
+          class "Application using Default functionality"{
+          }
+          class CommandlineApplication{
+          }
+          class UnitTest{
+          }
+          class ThirdPartyComponentDevelopment{
+          }
+          
+          SuperElastixFilter <|-- SuperElastixFilterCustomComponents
+          SuperElastixFilterCustomComponents -o UnitTest
+          SuperElastixFilterCustomComponents -o ThirdPartyComponentDevelopment
+          SuperElastixFilter -o CommandlineApplication
+          SuperElastixFilter -o "Application using Default functionality"
+          @enduml
+          
 User Component Creation
 -----------------------
 
 A SuperElastix Component consists of accepting and providing interfaces. To let the handshake mechanism handle a component correctly the component (class) must adhere to the following structure. The component class must derive from the :code:`SuperElastixComponent` class (solely). The :code:`SuperElastixComponent` is a templated class with signature :code:`< <Providing<I_A, I_B, ... >, Accepting<I_C, I_D, ... > > >`, with classes :code:`Providing` and :code:`Accepting` acting as placeholders to indicate the role of the interfaces :code:`I`.
-By inheriting of the :code:`SuperElastixComponent` class the component developer needs to provide the implementation for a number of methods. These are:
+By inheriting from the :code:`SuperElastixComponent` class the component developer needs to provide the implementation for a number of methods. These are:
 
-- All methods that have been defined in the (abstract) interfaces classes that component developer selected. 
+- All methods that have been defined in the providing interface classes that component developer selected. 
 
-- A :code:`virtual void Set(I_x*)` for each interface class :code:`I_x` that has been selected as providing interface. (This example uses raw pointes, but in the reality we use code:`std::shared_ptr` for this).
+- A :code:`virtual void Set(I_x*)` for each interface class :code:`I_x` that has been selected as accepting interface. (This example uses raw pointes, but in the reality we use code:`std::shared_ptr` for this).
 
 - The :code:`virtual bool MeetsCriterion( const CriterionType & criterion )`, which returns true if and only if the component has an implementation for which the criterion (read from the Blueprint) holds.
 
@@ -79,7 +116,7 @@ By inheriting of the :code:`SuperElastixComponent` class the component developer
     	  
           class SuperElastixComponent< "<Providing<I_A, I_B, ... >, Accepting<I_C, I_D, ... > >" > {
     	  "HandShakeMethods"()
-          }
+    	  }
     
           package Providing {
           class I_A << interface >> {
