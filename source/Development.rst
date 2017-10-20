@@ -82,9 +82,36 @@ We provide two library interfaces, each supporting a different use case:
 - *"Templated" SuperElastix ITK filter*, offering the most flexibility, useful for external third-party components and extreme use cases.
 
 In both cases SuperElastixFilter has an internal database of components that can be used to dynamically construct the registration algorithm of choice.
-In the "Precompiled" library this database is populated with a predefined list of components (each with predefined template arguments, such as dimensionality and pixel type, etc). Predefinition of the components allows for hiding the implementation details of the components and speeds up the compilation process of the application (done via the Pimpl idiom). The "Precompiled" library is still and ITK filter and depends on the (templated) header files of the itk library.
+In the "Precompiled" library this database is populated with a predefined list of components (each with predefined template arguments, such as dimensionality and pixel type, etc). Predefinition of the components allows for hiding the implementation details of the components and speeds up the compilation process of the application (done via the Pimpl idiom). The "Precompiled" library is still and ITK filter and depends on the (templated) header files of the itk library. The superElastixFilter is instantiated like this:
 
-In the "Templated" library the database of components can be populated by the user at compilation time by passing the component classes as template arguments. Applications using this library need access to all of SuperElastix internal source and header files at compilation time. This approach provides the flexibility to compile an instance of the SuperElastix ITK filter with, for instance, a sub- or superset of the default components, a set of components with exotic dimensionality or pixel types or even with third party components. Compiling the SuperElastix ITK filter with a small set of components is typically done in our Unit tests when testing a specific component or combination of components. Adding a third-party component to SuperElastix via template arguments does not require any modification of the source code files of the SuperElastixFilter. A third-party component can adhere to the existing already defined interfaces classes, but op top of that it can also define new interface classes.
+::
+  
+  #include "selxSuperElastixFilter.h"
+  selx::SuperElastixFilter::Pointer superElastixFilter = selx::SuperElastixFilter::New();
+
+In the "Templated" library the database of components can be populated by the user at compilation time by passing the component classes as template arguments. Applications using this library need access to all of SuperElastix internal source and header files at compilation time. This approach provides the flexibility to compile an instance of the SuperElastix ITK filter with, for instance, a sub- or superset of the default components, a set of components with exotic dimensionality or pixel types or even with third party components. Compiling the SuperElastix ITK filter with a small set of components is typically done in our Unit tests when testing a specific component or combination of components. Adding a third-party component to SuperElastix via template arguments does not require any modification of the source code files of the SuperElastixFilter. A third-party component can adhere to the existing already defined interfaces classes, but op top of that it can also define new interface classes. For example, the templated superElastixFilter is instantiated like this:
+
+::
+
+  #include "selxSuperElastixFilterCustomComponents.h"
+  // ... and #include all headers of the components used
+  
+  /** register all example components */
+  using RegisterComponents =  TypeList< 
+    ItkImageSourceComponent< 2, float >,
+    DisplacementFieldItkImageFilterSinkComponent< 2, float >,
+    ItkImageRegistrationMethodv4Component< 3, double, double >,
+    ItkImageRegistrationMethodv4Component< 2, float, double >,
+    ItkANTSNeighborhoodCorrelationImageToImageMetricv4Component< 2, float >,
+    ItkMeanSquaresImageToImageMetricv4Component< 2, float, double  >,
+    ItkGradientDescentOptimizerv4Component< double >,
+    ItkAffineTransformComponent< double, 2 >,
+    ItkTransformDisplacementFilterComponent< 2, float, double >,
+    RegistrationControllerComponent< >
+    >;
+
+  SuperElastixFilterBase::Pointer superElastixFilter = 
+    SuperElastixFilterCustomComponents< RegisterComponents >::New();
 
 .. ifconfig:: renderuml is 'False'
 
