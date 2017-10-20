@@ -14,16 +14,63 @@ The SuperElastixFilter is designed to be part of an itk pipeline such that it ca
 However, unlike common itk filters, the inputs and outputs of the SuperElastixFilter are typically unknown at compile time, because they depend on the Blueprint configuration describing the actual algorithm to execute. This complicates the setup of a pipeline, since up and downstream itk filters are typically templated over their datatypes.
 To stay as close as possible to the itk philosophy, the SuperElastixFilter supports 2 modes of operation:
 
-- *Known input and output types at compilation time*: E.g. an application embedding a dedicated registration task. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: :code:`ImageFileWriter<KnownImageType>::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput<KnownImageType>(identifier))`.
-- *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers.
+- *Known input and output types at compilation time*: E.g. to connect the SuperElastixFilter to conventional ITK filters, which are templated on data types, or an application that embeds a dedicated registration task. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: :code:`ImageFileWriter<KnownImageType>::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput<KnownImageType>(identifier))`. 
+  An example snippet:
 
-The following sequence diagrams show the order of function calls of each mode of operation.
+::
 
-.. image:: images/SeqDiagSelxFilterKnownTypes.png
+	// Set up the ITK reader
+	using InputImageType = itk::Image<float,3>;
+	using ImageReaderType = itk::ImageFileReader<InputImageType>;
+	ImageReaderType::Pointer reader = ImageReaderType::New();
+	reader->SetFileName( path );
 
-.. image:: images/SeqDiagSelxFilterUnknownTypes.png
+	// Set up the ITK writer
+	using OutputImageType = itk::Image<double,3>;
+	using ImageWriterType = itk::ImageFileWriter<OutputImageType>;
+	ImageWriterType::Pointer writer = ImageWriterType::New();
+	writer->SetFileName( path );
+	
+	// Connect the ITK pipeline (in arbitary order)
+	// Assume superElastixFilter was instantiated.
+	superElastixFilter->SetInput( "FixedImage", reader->GetOutput());
+	// The output of superElastixFilter needs to be made of OutputImageType explicitly.
+	writer->SetInput(superElastixFilter->GetOutput<OutputImageType>( "ResultImage" ));
+	// Assume blueprint was instantiated. It is requered that the blueprint defines the a source 
+	// component the named "FixedImage" that corresponds to the InputImageType. This holds for the 
+	// sink component "ResultImage" and OutputImageType. 
+	superElastixFilter->SetBlueprint(blueprint);
+	
+	// Updating the writer makes the superElastixFilter first parse the blueprint and the 
+	// connection before it executes.
+	writer->Update();
 
-Note that these are simplified diagrams and may not reflect all details and naming as found in the source code.
+- *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers. 
+  An example snippet:
+
+::
+
+	// Assume superElastixFilter and blueprint were instantiated.
+	// Set Blueprint first, which defines a source component called "FixedImage" and a sink component 
+	// called "ResultImage".
+	superElastixFilter->SetBlueprint(blueprint);
+	
+	// Get AnyReader for "FixedImage", this triggers the parsing of the Blueprint.
+	selx::AnyFileReader::Pointer reader = superElastixFilter->GetInputFileReader( "FixedImage" );
+	reader->SetFileName( path );
+
+	// Get AnyWriter for "ResultImage"
+	selx::AnyFileWriter::Pointer writer = superElastixFilter->GetOutputFileWriter( "ResultImage" );
+	writer->SetFileName( path );
+	
+	// Connect the ITK pipeline
+	superElastixFilter->SetInput( "FixedImage", reader->GetOutput() );
+	writer->SetInput( superElastixFilter->GetOutput( "ResultImage" ) );
+
+	// Updating the writer makes the superElastixFilter to execute.
+	writer->Update();
+
+Mixing these to modes of operation is allowed too.
 
 SuperElastixFilter component database manipulation
 --------------------------------------------------
