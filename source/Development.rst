@@ -14,16 +14,67 @@ The SuperElastixFilter is designed to be part of an itk pipeline such that it ca
 However, unlike common itk filters, the inputs and outputs of the SuperElastixFilter are typically unknown at compile time, because they depend on the Blueprint configuration describing the actual algorithm to execute. This complicates the setup of a pipeline, since up and downstream itk filters are typically templated over their datatypes.
 To stay as close as possible to the itk philosophy, the SuperElastixFilter supports 2 modes of operation:
 
-- *Known input and output types at compilation time*: E.g. an application embedding a dedicated registration task. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: :code:`ImageFileWriter<KnownImageType>::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput<KnownImageType>(identifier))`.
-- *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers.
+- *Known input and output types at compilation time*: E.g. to connect the SuperElastixFilter to conventional ITK filters, which are templated on data types, or an application that embeds a dedicated registration task. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: :code:`ImageFileWriter<KnownImageType>::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput<KnownImageType>(identifier))`. 
+  An example snippet:
 
-The following sequence diagrams show the order of function calls of each mode of operation.
+.. highlight:: c++
 
-.. image:: images/SeqDiagSelxFilterKnownTypes.png
+::
 
-.. image:: images/SeqDiagSelxFilterUnknownTypes.png
+	// Set up the ITK reader
+	using InputImageType = itk::Image<float,3>;
+	using ImageReaderType = itk::ImageFileReader<InputImageType>;
+	ImageReaderType::Pointer reader = ImageReaderType::New();
+	reader->SetFileName( path );
 
-Note that these are simplified diagrams and may not reflect all details and naming as found in the source code.
+	// Set up the ITK writer
+	using OutputImageType = itk::Image<double,3>;
+	using ImageWriterType = itk::ImageFileWriter<OutputImageType>;
+	ImageWriterType::Pointer writer = ImageWriterType::New();
+	writer->SetFileName( path );
+	
+	// Connect the ITK pipeline (in arbitary order)
+	// Assume superElastixFilter was instantiated.
+	superElastixFilter->SetInput( "FixedImage", reader->GetOutput());
+	// The output of superElastixFilter needs to be made of OutputImageType explicitly.
+	writer->SetInput(superElastixFilter->GetOutput<OutputImageType>( "ResultImage" ));
+	// Assume blueprint was instantiated. It is requered that the blueprint defines the a source 
+	// component the named "FixedImage" that corresponds to the InputImageType. This holds for the 
+	// sink component "ResultImage" and OutputImageType. 
+	superElastixFilter->SetBlueprint(blueprint);
+	
+	// Updating the writer makes the superElastixFilter first parse the blueprint and the 
+	// connection before it executes.
+	writer->Update();
+
+- *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers. 
+  An example snippet:
+
+.. highlight:: c++
+  
+::
+
+	// Assume superElastixFilter and blueprint were instantiated.
+	// Set Blueprint first, which defines a source component called "FixedImage" and a sink component 
+	// called "ResultImage".
+	superElastixFilter->SetBlueprint(blueprint);
+	
+	// Get AnyReader for "FixedImage", this triggers the parsing of the Blueprint.
+	selx::AnyFileReader::Pointer reader = superElastixFilter->GetInputFileReader( "FixedImage" );
+	reader->SetFileName( path );
+
+	// Get AnyWriter for "ResultImage"
+	selx::AnyFileWriter::Pointer writer = superElastixFilter->GetOutputFileWriter( "ResultImage" );
+	writer->SetFileName( path );
+	
+	// Connect the ITK pipeline
+	superElastixFilter->SetInput( "FixedImage", reader->GetOutput() );
+	writer->SetInput( superElastixFilter->GetOutput( "ResultImage" ) );
+
+	// Updating the writer makes the superElastixFilter to execute.
+	writer->Update();
+
+Mixing these to modes of operation is allowed too.
 
 SuperElastixFilter component database manipulation
 --------------------------------------------------
@@ -35,13 +86,44 @@ We provide two library interfaces, each supporting a different use case:
 - *"Templated" SuperElastix ITK filter*, offering the most flexibility, useful for external third-party components and extreme use cases.
 
 In both cases SuperElastixFilter has an internal database of components that can be used to dynamically construct the registration algorithm of choice.
-In the "Precompiled" library this database is populated with a predefined list of components (each with predefined template arguments, such as dimensionality and pixel type, etc). Predefinition of the components allows for hiding the implementation details of the components and speeds up the compilation process of the application (done via the Pimpl idiom). The "Precompiled" library is still and ITK filter and depends on the (templated) header files of the itk library.
+In the "Precompiled" library this database is populated with a predefined list of components (each with predefined template arguments, such as dimensionality and pixel type, etc). Predefinition of the components allows for hiding the implementation details of the components and speeds up the compilation process of the application (done via the Pimpl idiom). The "Precompiled" library is still and ITK filter and depends on the (templated) header files of the itk library. The superElastixFilter is instantiated like this:
 
-In the "Templated" library the database of components can be populated by the user at compilation time by passing the component classes as template arguments. Applications using this library need access to all of SuperElastix internal source and header files at compilation time. This approach provides the flexibility to compile an instance of the SuperElastix ITK filter with, for instance, a sub- or superset of the default components, a set of components with exotic dimensionality or pixel types or even with third party components. Compiling the SuperElastix ITK filter with a small set of components is typically done in our Unit tests when testing a specific component or combination of components. Adding a third-party component to SuperElastix via template arguments does not require any modification of the source code files of the SuperElastixFilter. A third-party component can adhere to the existing already defined interfaces classes, but op top of that it can also define new interface classes.
+.. highlight:: c++
+
+::
+  
+  #include "selxSuperElastixFilter.h"
+  selx::SuperElastixFilter::Pointer superElastixFilter = selx::SuperElastixFilter::New();
+
+In the "Templated" library the database of components can be populated by the user at compilation time by passing the component classes as template arguments. Applications using this library need access to all of SuperElastix internal source and header files at compilation time. This approach provides the flexibility to compile an instance of the SuperElastix ITK filter with, for instance, a sub- or superset of the default components, a set of components with exotic dimensionality or pixel types or even with third party components. Compiling the SuperElastix ITK filter with a small set of components is typically done in our Unit tests when testing a specific component or combination of components. Adding a third-party component to SuperElastix via template arguments does not require any modification of the source code files of the SuperElastixFilter. A third-party component can adhere to the existing already defined interfaces classes, but op top of that it can also define new interface classes. For example, the templated superElastixFilter is instantiated like this:
+
+.. highlight:: c++
+
+::
+
+  #include "selxSuperElastixFilterCustomComponents.h"
+  // ... and #include all headers of the components used
+  
+  /** register all example components */
+  using RegisterComponents =  TypeList< 
+    ItkImageSourceComponent< 2, float >,
+    DisplacementFieldItkImageFilterSinkComponent< 2, float >,
+    ItkImageRegistrationMethodv4Component< 3, double, double >,
+    ItkImageRegistrationMethodv4Component< 2, float, double >,
+    ItkANTSNeighborhoodCorrelationImageToImageMetricv4Component< 2, float >,
+    ItkMeanSquaresImageToImageMetricv4Component< 2, float, double  >,
+    ItkGradientDescentOptimizerv4Component< double >,
+    ItkAffineTransformComponent< double, 2 >,
+    ItkTransformDisplacementFilterComponent< 2, float, double >,
+    RegistrationControllerComponent< >
+    >;
+
+  SuperElastixFilterBase::Pointer superElastixFilter = 
+    SuperElastixFilterCustomComponents< RegisterComponents >::New();
 
 .. ifconfig:: renderuml is 'False'
 
-    .. image:: rendered/plantuml-5007a4dab7c7f2bfdf4923708c823bec3f99f36f.png
+    .. image:: rendered/plantuml-6e4014b7bc570282f5d3b31dbb51812873d77717.png
 
 .. ifconfig:: renderuml is 'True'
     
@@ -60,11 +142,15 @@ In the "Templated" library the database of components can be populated by the us
           networkBuilderBase* m_NetworkBuilder = networkBuilder< CompontentA<>, ... , CompontentZ<> >
           }
           
+          class SuperElastixFilterBase {
+          "All ItkFilterMethods"
+          }
+		  
           class SuperElastixFilter {
           networkBuilderBase* m_NetworkBuilder = networkBuilder< DefaultComponentList ...  >
-          "All ItkFilterMethods()"
-          }
-          
+
+          }          
+		  
           class "Application using Default functionality"{
           }
           class CommandlineApplication{
@@ -74,9 +160,10 @@ In the "Templated" library the database of components can be populated by the us
           class ThirdPartyComponentDevelopment{
           }
           
-          SuperElastixFilterCustomComponents --|> SuperElastixFilter
+          SuperElastixFilterCustomComponents --|> SuperElastixFilterBase
           SuperElastixFilterCustomComponents -down-o UnitTest
           SuperElastixFilterCustomComponents -down-o ThirdPartyComponentDevelopment
+		  SuperElastixFilter --|> SuperElastixFilterBase
           SuperElastixFilter -down-o CommandlineApplication
           SuperElastixFilter -down-o "Application using Default functionality"
           @enduml
