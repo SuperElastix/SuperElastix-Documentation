@@ -17,6 +17,8 @@ To stay as close as possible to the itk philosophy, the SuperElastixFilter suppo
 - *Known input and output types at compilation time*: E.g. to connect the SuperElastixFilter to conventional ITK filters, which are templated on data types, or an application that embeds a dedicated registration task. That is, the application developer makes sure that any Blueprints to be used, will correspond to the (compile-time defined) number and types of inputs and outputs by known identifier names (defined by the Sink and Source Components). In this mode, the order in which the inputs and outputs are connected to other filters, and the Blueprint (Object) is set, is arbitrary. However, to connect the output of the SuperElastixFilter a templated version of GetOutput must be used: :code:`ImageFileWriter<KnownImageType>::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput<KnownImageType>(identifier))`. 
   An example snippet:
 
+.. highlight:: c++
+
 ::
 
 	// Set up the ITK reader
@@ -48,6 +50,8 @@ To stay as close as possible to the itk philosophy, the SuperElastixFilter suppo
 - *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers. 
   An example snippet:
 
+.. highlight:: c++
+  
 ::
 
 	// Assume superElastixFilter and blueprint were instantiated.
@@ -84,12 +88,16 @@ We provide two library interfaces, each supporting a different use case:
 In both cases SuperElastixFilter has an internal database of components that can be used to dynamically construct the registration algorithm of choice.
 In the "Precompiled" library this database is populated with a predefined list of components (each with predefined template arguments, such as dimensionality and pixel type, etc). Predefinition of the components allows for hiding the implementation details of the components and speeds up the compilation process of the application (done via the Pimpl idiom). The "Precompiled" library is still and ITK filter and depends on the (templated) header files of the itk library. The superElastixFilter is instantiated like this:
 
+.. highlight:: c++
+
 ::
   
   #include "selxSuperElastixFilter.h"
   selx::SuperElastixFilter::Pointer superElastixFilter = selx::SuperElastixFilter::New();
 
 In the "Templated" library the database of components can be populated by the user at compilation time by passing the component classes as template arguments. Applications using this library need access to all of SuperElastix internal source and header files at compilation time. This approach provides the flexibility to compile an instance of the SuperElastix ITK filter with, for instance, a sub- or superset of the default components, a set of components with exotic dimensionality or pixel types or even with third party components. Compiling the SuperElastix ITK filter with a small set of components is typically done in our Unit tests when testing a specific component or combination of components. Adding a third-party component to SuperElastix via template arguments does not require any modification of the source code files of the SuperElastixFilter. A third-party component can adhere to the existing already defined interfaces classes, but op top of that it can also define new interface classes. For example, the templated superElastixFilter is instantiated like this:
+
+.. highlight:: c++
 
 ::
 
@@ -115,7 +123,7 @@ In the "Templated" library the database of components can be populated by the us
 
 .. ifconfig:: renderuml is 'False'
 
-    .. image:: rendered/plantuml-5007a4dab7c7f2bfdf4923708c823bec3f99f36f.png
+    .. image:: rendered/plantuml-6e4014b7bc570282f5d3b31dbb51812873d77717.png
 
 .. ifconfig:: renderuml is 'True'
     
@@ -134,11 +142,15 @@ In the "Templated" library the database of components can be populated by the us
           networkBuilderBase* m_NetworkBuilder = networkBuilder< CompontentA<>, ... , CompontentZ<> >
           }
           
+          class SuperElastixFilterBase {
+          "All ItkFilterMethods"
+          }
+		  
           class SuperElastixFilter {
           networkBuilderBase* m_NetworkBuilder = networkBuilder< DefaultComponentList ...  >
-          "All ItkFilterMethods()"
-          }
-          
+
+          }          
+		  
           class "Application using Default functionality"{
           }
           class CommandlineApplication{
@@ -148,9 +160,10 @@ In the "Templated" library the database of components can be populated by the us
           class ThirdPartyComponentDevelopment{
           }
           
-          SuperElastixFilterCustomComponents --|> SuperElastixFilter
+          SuperElastixFilterCustomComponents --|> SuperElastixFilterBase
           SuperElastixFilterCustomComponents -down-o UnitTest
           SuperElastixFilterCustomComponents -down-o ThirdPartyComponentDevelopment
+		  SuperElastixFilter --|> SuperElastixFilterBase
           SuperElastixFilter -down-o CommandlineApplication
           SuperElastixFilter -down-o "Application using Default functionality"
           @enduml
