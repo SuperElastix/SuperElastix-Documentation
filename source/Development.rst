@@ -1,4 +1,4 @@
-.. _Development:
+﻿.. _Development:
 
 Development
 ===============
@@ -21,31 +21,31 @@ To stay as close as possible to the itk philosophy, the SuperElastixFilter suppo
    :caption: Example usage if input and output types are known at compilation time
    :name: SuperElastixKnownIO
 
-	// Set up the ITK reader
-	using InputImageType = itk::Image<float,3>;
-	using ImageReaderType = itk::ImageFileReader<InputImageType>;
-	ImageReaderType::Pointer reader = ImageReaderType::New();
-	reader->SetFileName( path );
+    // Set up the ITK reader
+    using InputImageType = itk::Image<float,3>;
+    using ImageReaderType = itk::ImageFileReader<InputImageType>;
+    ImageReaderType::Pointer reader = ImageReaderType::New();
+    reader->SetFileName( path );
 
-	// Set up the ITK writer
-	using OutputImageType = itk::Image<double,3>;
-	using ImageWriterType = itk::ImageFileWriter<OutputImageType>;
-	ImageWriterType::Pointer writer = ImageWriterType::New();
-	writer->SetFileName( path );
-	
-	// Connect the ITK pipeline (in arbitary order)
-	// Assume superElastixFilter was instantiated.
-	superElastixFilter->SetInput( "FixedImage", reader->GetOutput());
-	// The output of superElastixFilter needs to be made of OutputImageType explicitly.
-	writer->SetInput(superElastixFilter->GetOutput<OutputImageType>( "ResultImage" ));
-	// Assume blueprint was instantiated. It is requered that the blueprint defines the a source 
-	// component the named "FixedImage" that corresponds to the InputImageType. This holds 
-	// for the sink component "ResultImage" and OutputImageType. 
-	superElastixFilter->SetBlueprint(blueprint);
-	
-	// Updating the writer makes the superElastixFilter first parse the blueprint and the 
-	// connection before it executes.
-	writer->Update();
+    // Set up the ITK writer
+    using OutputImageType = itk::Image<double,3>;
+    using ImageWriterType = itk::ImageFileWriter<OutputImageType>;
+    ImageWriterType::Pointer writer = ImageWriterType::New();
+    writer->SetFileName( path );
+    
+    // Connect the ITK pipeline (in arbitary order)
+    // Assume superElastixFilter was instantiated.
+    superElastixFilter->SetInput( "FixedImage", reader->GetOutput());
+    // The output of superElastixFilter needs to be made of OutputImageType explicitly.
+    writer->SetInput(superElastixFilter->GetOutput<OutputImageType>( "ResultImage" ));
+    // Assume blueprint was instantiated. It is requered that the blueprint defines the a source 
+    // component the named "FixedImage" that corresponds to the InputImageType. This holds 
+    // for the sink component "ResultImage" and OutputImageType. 
+    superElastixFilter->SetBlueprint(blueprint);
+    
+    // Updating the writer makes the superElastixFilter first parse the blueprint and the 
+    // connection before it executes.
+    writer->Update();
 
 - *Unknown input and output types at compilation time*: E.g. the class implementing the commandline interface is not aware of the datatypes used by all components. (In this way, adding custom components with new types does not affect the source code of the commandline interface). The commandline interface is invoked by pairs of filenames and identifier names. The identifiers refer to Sink or Source Components as defined via the Blueprint that, in turn, define the data types. In this mode, the commandline interface typically cannot instantiate readers or writers because they are templated over the data types. Instead, the SuperElastixFilter is requested to return appropriate readers and writers corresponding to the identifier names. SuperElastix will return respectively an AnyReader or AnyWriter, which are non-templated Base Classes that, if updated, use the appropriate reader of writer internally (by use of polymorphism): :code:`AnyWriter::Pointer my_writer;` :code:`...` :code:`my_writer->SetInput(superElastixFilter->GetOutput(identifier))`. In this mode, it is required to set the Blueprint prior to request and connect readers or writers. 
   An example snippet:
@@ -54,25 +54,25 @@ To stay as close as possible to the itk philosophy, the SuperElastixFilter suppo
    :caption: Example usage if input and output types are unknown at compilation time
    :name: SuperElastixUnknownIO
 
-	// Assume superElastixFilter and blueprint were instantiated.
-	// Set Blueprint first, which defines a source component called "FixedImage" and a sink 
-	// component called "ResultImage".
-	superElastixFilter->SetBlueprint(blueprint);
-	
-	// Get AnyReader for "FixedImage", this triggers the parsing of the Blueprint.
-	selx::AnyFileReader::Pointer reader = superElastixFilter->GetInputFileReader( "FixedImage" );
-	reader->SetFileName( path );
+    // Assume superElastixFilter and blueprint were instantiated.
+    // Set Blueprint first, which defines a source component called "FixedImage" and a sink 
+    // component called "ResultImage".
+    superElastixFilter->SetBlueprint(blueprint);
+    
+    // Get AnyReader for "FixedImage", this triggers the parsing of the Blueprint.
+    selx::AnyFileReader::Pointer reader = superElastixFilter->GetInputFileReader( "FixedImage" );
+    reader->SetFileName( path );
 
-	// Get AnyWriter for "ResultImage"
-	selx::AnyFileWriter::Pointer writer = superElastixFilter->GetOutputFileWriter( "ResultImage" );
-	writer->SetFileName( path );
-	
-	// Connect the ITK pipeline
-	superElastixFilter->SetInput( "FixedImage", reader->GetOutput() );
-	writer->SetInput( superElastixFilter->GetOutput( "ResultImage" ) );
+    // Get AnyWriter for "ResultImage"
+    selx::AnyFileWriter::Pointer writer = superElastixFilter->GetOutputFileWriter( "ResultImage" );
+    writer->SetFileName( path );
+    
+    // Connect the ITK pipeline
+    superElastixFilter->SetInput( "FixedImage", reader->GetOutput() );
+    writer->SetInput( superElastixFilter->GetOutput( "ResultImage" ) );
 
-	// Updating the writer makes the superElastixFilter to execute.
-	writer->Update();
+    // Updating the writer makes the superElastixFilter to execute.
+    writer->Update();
 
 Mixing these to modes of operation is allowed too.
 
@@ -145,12 +145,12 @@ In the "Templated" library the database of components can be populated by the us
           class SuperElastixFilterBase {
           "All ItkFilterMethods"
           }
-		  
+          
           class SuperElastixFilter {
           networkBuilderBase* m_NetworkBuilder = networkBuilder< DefaultComponentList ...  >
 
           }          
-		  
+          
           class "Application using Default functionality"{
           }
           class CommandlineApplication{
@@ -163,7 +163,7 @@ In the "Templated" library the database of components can be populated by the us
           SuperElastixFilterCustomComponents --|> SuperElastixFilterBase
           SuperElastixFilterCustomComponents -down-o UnitTest
           SuperElastixFilterCustomComponents -down-o ThirdPartyComponentDevelopment
-		  SuperElastixFilter --|> SuperElastixFilterBase
+          SuperElastixFilter --|> SuperElastixFilterBase
           SuperElastixFilter -down-o CommandlineApplication
           SuperElastixFilter -down-o "Application using Default functionality"
           @enduml
@@ -197,42 +197,42 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
           skinparam classAttributeIconSize 0
           hide empty members
           
-    	  class CustomComponent{
-    	  type_A Method_A(args)
-    	  type_B Method_B(args)
-    	  void Set(I_C*)
-    	  void Set(I_D*)
-    	  bool MeetsCriterion()
-    	  }
-    	  
+          class CustomComponent{
+          type_A Method_A(args)
+          type_B Method_B(args)
+          void Set(I_C*)
+          void Set(I_D*)
+          bool MeetsCriterion()
+          }
+          
           class SuperElastixComponent< "<Providing<I_A, I_B, ... >, Accepting<I_C, I_D, ... > >" > {
-    	  "HandShakeMethods"()
-    	  }
+          "HandShakeMethods"()
+          }
     
           package Providing {
           class I_A << interface >> {
-    	  type_A Method_A(args)
-    	  }
+          type_A Method_A(args)
+          }
           class I_B << interface >> {
-    	  type_B Method_B(args)
+          type_B Method_B(args)
           }
           }
-    	  
-          package Accepting {	  
+          
+          package Accepting {     
           class "Acceptor<I_C>" << interface >> {
           void Set(I_C*)
           }
-    	  
+          
           class "Acceptor<I_D>" << interface >> {
           void Set(I_D*)
           }
-    	  }
-    	  
-    	  class ComponentBase {
-    	  bool MeetsCriterion()
-    	  "HandShakeMethods"()
-    	  }
-    	  
+          }
+          
+          class ComponentBase {
+          bool MeetsCriterion()
+          "HandShakeMethods"()
+          }
+          
           ComponentBase <|-- SuperElastixComponent
           I_A <|-- SuperElastixComponent
           I_B <|-- SuperElastixComponent
@@ -241,145 +241,145 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
           
           SuperElastixComponent <|-- CustomComponent 
           @enduml
-	
+    
 .. code-block:: c++
-	:caption: Layout of an example component of SuperElastix
-	:name: SuperElastixComponentLayout
+    :caption: Layout of an example component of SuperElastix
+    :name: SuperElastixComponentLayout
 
-	// Required include guards
-	#ifndef selxExampleComponent_h
-	#define selxExampleComponent_h
-	
-	// Required include of selxSuperElastixComponent
-	#include "selxSuperElastixComponent.h"
+    // Required include guards
+    #ifndef selxExampleComponent_h
+    #define selxExampleComponent_h
+    
+    // Required include of selxSuperElastixComponent
+    #include "selxSuperElastixComponent.h"
 
-	// Optionally include other interface definitions
-	// #include "selxSinksAndSourcesInterfaces.h"
+    // Optionally include other interface definitions
+    // #include "selxSinksAndSourcesInterfaces.h"
 
-	// Optionally include your code base specific headers.
-	// ...
-	
-	namespace selx
-	{
-	// Choose your own template arguments for the component
-	template< int Dimensionality, class PixelType, class TInternalComputationValue > 
-	class ExampleComponent :
-	  public SuperElastixComponent<
-	    // define any number of Accepting interfaces
-	    Accepting< 
-	      ExampleAInterface< Dimensionality >,
-	      ExampleBInterface< TInternalComputationValue, Dimensionality >
-	    >,
-	    // define any number of Providing interfaces
-	    Providing< 
-	      ExampleCInterface< Dimensionality, PixelType >
-	    >
-	  >
-	{
-	
-	public:
-	
-	  // Important: the definition of Superclass must match the definition above.
-	  using Superclass = SuperElastixComponent<
-	    Accepting< ExampleAInterface< Dimensionality >,
-	    ExampleBInterface< TInternalComputationValue, Dimensionality >
-	    >,
-	    Providing< ExampleCInterface< Dimensionality, PixelType >
-	    >
-	  >;
+    // Optionally include your code base specific headers.
+    // ...
+    
+    namespace selx
+    {
+    // Choose your own template arguments for the component
+    template< int Dimensionality, class PixelType, class TInternalComputationValue > 
+    class ExampleComponent :
+      public SuperElastixComponent<
+        // define any number of Accepting interfaces
+        Accepting< 
+          ExampleAInterface< Dimensionality >,
+          ExampleBInterface< TInternalComputationValue, Dimensionality >
+        >,
+        // define any number of Providing interfaces
+        Providing< 
+          ExampleCInterface< Dimensionality, PixelType >
+        >
+      >
+    {
+    
+    public:
+    
+      // Important: the definition of Superclass must match the definition above.
+      using Superclass = SuperElastixComponent<
+        Accepting< ExampleAInterface< Dimensionality >,
+        ExampleBInterface< TInternalComputationValue, Dimensionality >
+        >,
+        Providing< ExampleCInterface< Dimensionality, PixelType >
+        >
+      >;
 
-	  // A constructor with arguments for name and logger is required.
-	  ExampleComponent( const std::string & name, LoggerImpl & logger );
-	  
-	  virtual ~ExampleComponent();
+      // A constructor with arguments for name and logger is required.
+      ExampleComponent( const std::string & name, LoggerImpl & logger );
+      
+      virtual ~ExampleComponent();
 
-	  //For each Accepting Interface a Set method must be implemented:
-	  virtual int Set( typename ExampleAInterface< Dimensionality >::Pointer ) override;
+      //For each Accepting Interface a Set method must be implemented:
+      virtual int Set( typename ExampleAInterface< Dimensionality >::Pointer ) override;
 
-	  virtual int Set( typename ExampleBInterface< TInternalComputationValue, Dimensionality >::Pointer ) override;
+      virtual int Set( typename ExampleBInterface< TInternalComputationValue, Dimensionality >::Pointer ) override;
 
-	  // All methods in all Providing Interfaces must be implemented:
-	  virtual SomeImageType<PixelType, Dimensionality>* GetImage() override;
+      // All methods in all Providing Interfaces must be implemented:
+      virtual SomeImageType<PixelType, Dimensionality>* GetImage() override;
 
-	  //BaseClass methods
-	  virtual bool MeetsCriterion( const ComponentBase::CriterionType & criterion ) override;
+      //BaseClass methods
+      virtual bool MeetsCriterion( const ComponentBase::CriterionType & criterion ) override;
 
-	private:
+    private:
 
-	  // Typically a component stores the pointer to the Interfaces it accepts by Set(), however 
-	  // this is not required.
-	  typename ExampleAInterface< Dimensionality >::Pointer m_ExampleAInterface;
-	  
-	  // Optionally include your own methods and members
-	  // ...
-	  
-	protected:
+      // Typically a component stores the pointer to the Interfaces it accepts by Set(), however 
+      // this is not required.
+      typename ExampleAInterface< Dimensionality >::Pointer m_ExampleAInterface;
+      
+      // Optionally include your own methods and members
+      // ...
+      
+    protected:
 
-	  // Optional, but recommended: TemplateProperties() is typically used in MeetsCriterion()
-	  // return the class name and the template arguments to uniquely identify this component.
-	  static inline const std::map< std::string, std::string > TemplateProperties()
-	  {
-	  return { { keys::NameOfClass, "ExampleComponent" }, 
-	           { keys::PixelType, PodString< PixelType >::Get() }, 
-	           { keys::InternalComputationValueType, PodString< TInternalComputationValue >::Get() }, 
-	           { keys::Dimensionality, std::to_string( Dimensionality ) } 
-	         };
-	  }
-	};
-	} //end namespace selx
-	#ifndef ITK_MANUAL_INSTANTIATION
-	#include "selxExampleComponent.hxx"
-	#endif
-	#endif // #define ExampleComponent_h
+      // Optional, but recommended: TemplateProperties() is typically used in MeetsCriterion()
+      // return the class name and the template arguments to uniquely identify this component.
+      static inline const std::map< std::string, std::string > TemplateProperties()
+      {
+      return { { keys::NameOfClass, "ExampleComponent" }, 
+               { keys::PixelType, PodString< PixelType >::Get() }, 
+               { keys::InternalComputationValueType, PodString< TInternalComputationValue >::Get() }, 
+               { keys::Dimensionality, std::to_string( Dimensionality ) } 
+             };
+      }
+    };
+    } //end namespace selx
+    #ifndef ITK_MANUAL_INSTANTIATION
+    #include "selxExampleComponent.hxx"
+    #endif
+    #endif // #define ExampleComponent_h
 
 .. code-block:: c++
-	:caption: Interface definitions of an example component of SuperElastix
-	:name: SuperElastixComponentInterfaces
+    :caption: Interface definitions of an example component of SuperElastix
+    :name: SuperElastixComponentInterfaces
 
-	// And interface class is pure virtual, thus no methods have an implementation at this stage
-	template< int Dimensionality >
-	class ExampleAInterface
-	{
-	public:
-	  // Some convenience typedefs
-	  using Type = ExampleAInterface< Dimensionality>;
-	  using Pointer = std::shared_ptr< Type >;
-	  
-	  // Define 1 or more methods, with any type of input and output arguments.
-	  virtual int MethodA1() = 0;
-	  // virtual bool MethodA2( TInternalComputationValueType value) = 0;
-	};
+    // And interface class is pure virtual, thus no methods have an implementation at this stage
+    template< int Dimensionality >
+    class ExampleAInterface
+    {
+    public:
+      // Some convenience typedefs
+      using Type = ExampleAInterface< Dimensionality>;
+      using Pointer = std::shared_ptr< Type >;
+      
+      // Define 1 or more methods, with any type of input and output arguments.
+      virtual int MethodA1() = 0;
+      // virtual bool MethodA2( TInternalComputationValueType value) = 0;
+    };
 
-	template< class TInternalComputationValueType, int Dimensionality >
-	class ExampleBInterface
-	{
-	  // ...
-	};
-	
-	template< class PixelType, int Dimensionality >
-	class ExampleCInterface
-	{
-	  using Type = ExampleCInterface< PixelType, Dimensionality>;
-	  using Pointer = std::shared_ptr< Type >;
-	  virtual SomeImageType<PixelType, Dimensionality>* GetImage( ) = 0;
-	};
+    template< class TInternalComputationValueType, int Dimensionality >
+    class ExampleBInterface
+    {
+      // ...
+    };
+    
+    template< class PixelType, int Dimensionality >
+    class ExampleCInterface
+    {
+      using Type = ExampleCInterface< PixelType, Dimensionality>;
+      using Pointer = std::shared_ptr< Type >;
+      virtual SomeImageType<PixelType, Dimensionality>* GetImage( ) = 0;
+    };
 
-	// ...
-	
-	template< class PixelType, int Dimensionality >
-	struct Properties< ExampleCInterface< PixelType, Dimensionality >>
-	{
-	  static const std::map< std::string, std::string > Get()
-	  {
-	    // return all the properties how to identify this interface as strings
-	    return { { keys::NameOfInterface, "ExampleCInterface" }, // required: class name
-	      { keys::PixelType, PodString< PixelType >::Get() }, // required: all template arguments
-	      { keys::Dimensionality, std::to_string( Dimensionality ) }, 
-	      { "Role", "Fixed" } // optional: more descriptive properties to select this interface
-	    };
-	  }
-	};
-	
+    // ...
+    
+    template< class PixelType, int Dimensionality >
+    struct Properties< ExampleCInterface< PixelType, Dimensionality >>
+    {
+      static const std::map< std::string, std::string > Get()
+      {
+        // return all the properties how to identify this interface as strings
+        return { { keys::NameOfInterface, "ExampleCInterface" }, // required: class name
+          { keys::PixelType, PodString< PixelType >::Get() }, // required: all template arguments
+          { keys::Dimensionality, std::to_string( Dimensionality ) }, 
+          { "Role", "Fixed" } // optional: more descriptive properties to select this interface
+        };
+      }
+    };
+    
 Cmake module selection system
 -----------------------------
 
