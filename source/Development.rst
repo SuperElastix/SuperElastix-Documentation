@@ -176,13 +176,13 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
 
 - All methods that have been defined in the providing interface classes that component developer selected. 
 
-- A :code:`virtual void Set(I_x*)` for each interface class :code:`I_x` that has been selected as accepting interface. (This example uses raw pointes, but in the reality we use code:`std::shared_ptr` for this).
+- A :code:`virtual void Accept(I_x*)` for each interface class :code:`I_x` that has been selected as accepting interface. (This example uses raw pointes, but in the reality we use code:`std::shared_ptr` for this).
 
 - The :code:`virtual bool MeetsCriterion( const CriterionType & criterion )`, which returns true if and only if the component has an implementation for which the criterion (read from the Blueprint) holds or can be fulfilled.
 
 .. ifconfig:: renderuml is 'False'
 
-    .. image:: rendered/plantuml-d1f04ea4e651f964fcc5c4101b3d5b03121084b1.png
+    .. image:: rendered/plantuml-4cc137eef69ce9b76cba2a34c91faf1b684b1e5a.png
 
 .. ifconfig:: renderuml is 'True'
     
@@ -200,8 +200,8 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
           class CustomComponent{
           type_A Method_A(args)
           type_B Method_B(args)
-          void Set(I_C*)
-          void Set(I_D*)
+          void Accept(I_C*)
+          void Accept(I_D*)
           bool MeetsCriterion()
           }
           
@@ -220,11 +220,11 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
           
           package Accepting {     
           class "Acceptor<I_C>" << interface >> {
-          void Set(I_C*)
+          void Accept(I_C*)
           }
           
           class "Acceptor<I_D>" << interface >> {
-          void Set(I_D*)
+          void Accept(I_D*)
           }
           }
           
@@ -293,10 +293,10 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
       
       virtual ~ExampleComponent();
 
-      //For each Accepting Interface a Set method must be implemented:
-      virtual int Set( typename ExampleAInterface< Dimensionality >::Pointer ) override;
+      //For each Accepting Interface a Accept method must be implemented:
+      virtual int Accept( typename ExampleAInterface< Dimensionality >::Pointer ) override;
 
-      virtual int Set( typename ExampleBInterface< TInternalComputationValue, Dimensionality >::Pointer ) override;
+      virtual int Accept( typename ExampleBInterface< TInternalComputationValue, Dimensionality >::Pointer ) override;
 
       // All methods in all Providing Interfaces must be implemented:
       virtual SomeImageType<PixelType, Dimensionality>* GetImage() override;
@@ -306,7 +306,7 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
 
     private:
 
-      // Typically a component stores the pointer to the Interfaces it accepts by Set(), however 
+      // Typically a component stores the pointer to the Interfaces it accepts by Accept(), however 
       // this is not required.
       typename ExampleAInterface< Dimensionality >::Pointer m_ExampleAInterface;
       
