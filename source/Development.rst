@@ -6,6 +6,50 @@ Development
 With SuperElastix we aim to capture a wide range of registration methods, accessible via a single high-level user interface.  At the core of our design is a single collection of components with heterogeneous levels of functionality and granularity. This means that a component can implement a single concept (metric, transform, etc.) to be reused in many methods, can implement multiple (tightly coupled) concepts in one, or even be a full registration algorithm. Breaking up algorithms in small components allows a user to mix-and-match component, whereas treating a larger part of algorithms as monolithic blocks lowers the barrier for integration of new methods and paradigms and reuse of existing codebases. 
 By a high level user configuration, components are selected at run-time and are connected via a user-defined network layout. A generic handshake mechanism verifies whether connected components are compatible both mathematically as on a software level. The user is notified if specific combinations are incompatible or not supported (yet).
 
+.. ifconfig:: renderuml is 'True'
+    
+    .. uml::
+    
+        @startuml
+          
+          'style options 
+          skinparam monochrome true
+          skinparam circledCharacterRadius 0
+          skinparam circledCharacterFontSize 0
+          skinparam classAttributeIconSize 0
+          hide empty members
+
+          component "Component A" as CompA {
+          }
+        
+          component "Component B" as CompB{
+          }
+
+          together {
+            interface " " as I_Before1
+            interface " " as I_Before2
+          }
+          
+          together {
+            interface " " as I_A
+            interface " " as I_B
+            interface " " as I_C
+          }
+          together {
+            interface " " as I_After1
+            interface " " as I_After2
+          }
+          
+          I_Before1 )- CompA
+          I_Before2 )- CompA
+          CompA -() I_A : "Interface I_A"
+          I_A )-- CompB : "Acceptor<I_A>"
+          CompA -() I_C : "Interface I_C"
+          I_B )-- CompB : "Acceptor<I_B>"
+          CompB -() I_After1
+          CompB -() I_After2
+          
+        @enduml
 
 SuperElastixFilter input and output datatypes
 ---------------------------------------------
