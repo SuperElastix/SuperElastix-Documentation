@@ -10,6 +10,7 @@ Contents:
 .. toctree:: 
     GettingStarted
     Usage
-    Toolboxes
+    Design
     Development
+    Toolboxes
     Dashboard

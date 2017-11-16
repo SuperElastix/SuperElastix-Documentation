@@ -3,54 +3,6 @@
 Development
 ===============
 
-With SuperElastix we aim to capture a wide range of registration methods, accessible via a single high-level user interface.  At the core of our design is a single collection of components with heterogeneous levels of functionality and granularity. This means that a component can implement a single concept (metric, transform, etc.) to be reused in many methods, can implement multiple (tightly coupled) concepts in one, or even be a full registration algorithm. Breaking up algorithms in small components allows a user to mix-and-match component, whereas treating a larger part of algorithms as monolithic blocks lowers the barrier for integration of new methods and paradigms and reuse of existing codebases. 
-By a high level user configuration, components are selected at run-time and are connected via a user-defined network layout. A generic handshake mechanism verifies whether connected components are compatible both mathematically as on a software level. The user is notified if specific combinations are incompatible or not supported (yet).
-
-.. ifconfig:: renderuml is 'True'
-    
-    .. uml::
-    
-        @startuml
-          
-          'style options 
-          skinparam monochrome true
-          skinparam circledCharacterRadius 0
-          skinparam circledCharacterFontSize 0
-          skinparam classAttributeIconSize 0
-          hide empty members
-
-          component "Component A" as CompA {
-          }
-        
-          component "Component B" as CompB{
-          }
-
-          together {
-            interface " " as I_Before1
-            interface " " as I_Before2
-          }
-          
-          together {
-            interface " " as I_A
-            interface " " as I_B
-            interface " " as I_C
-          }
-          together {
-            interface " " as I_After1
-            interface " " as I_After2
-          }
-          
-          I_Before1 )- CompA
-          I_Before2 )- CompA
-          CompA -() I_A : "Interface I_A"
-          I_A )-- CompB : "Acceptor<I_A>"
-          CompA -() I_C : "Interface I_C"
-          I_B )-- CompB : "Acceptor<I_B>"
-          CompB -() I_After1
-          CompB -() I_After2
-          
-        @enduml
-
 SuperElastixFilter input and output datatypes
 ---------------------------------------------
 
@@ -165,52 +117,50 @@ In the "Templated" library the database of components can be populated by the us
   SuperElastixFilterBase::Pointer superElastixFilter = 
     SuperElastixFilterCustomComponents< RegisterComponents >::New();
 
-.. ifconfig:: renderuml is 'False'
+.. figure:: rendered/plantuml-1fc5bd95c100b65682bf7bef861a91018e46c238.png
+      
+      UML use case diagram for "Templated" and "Precompiled" library
 
-    .. image:: rendered/plantuml-6e4014b7bc570282f5d3b31dbb51812873d77717.png
-
+      
 .. ifconfig:: renderuml is 'True'
     
     .. uml::
     
-          @startuml
-          
-          'style options 
-          skinparam monochrome true
-          skinparam circledCharacterRadius 0
-          skinparam circledCharacterFontSize 0
-          skinparam classAttributeIconSize 0
-          hide empty members
-          
-          class SuperElastixFilterCustomComponents< "<CompontentA<> ... CompontentZ<>>" > {
-          networkBuilderBase* m_NetworkBuilder = networkBuilder< CompontentA<>, ... , CompontentZ<> >
-          }
-          
-          class SuperElastixFilterBase {
-          "All ItkFilterMethods"
-          }
-          
-          class SuperElastixFilter {
-          networkBuilderBase* m_NetworkBuilder = networkBuilder< DefaultComponentList ...  >
-
-          }          
-          
-          class "Application using Default functionality"{
-          }
-          class CommandlineApplication{
-          }
-          class UnitTest{
-          }
-          class ThirdPartyComponentDevelopment{
-          }
-          
-          SuperElastixFilterCustomComponents --|> SuperElastixFilterBase
-          SuperElastixFilterCustomComponents -down-o UnitTest
-          SuperElastixFilterCustomComponents -down-o ThirdPartyComponentDevelopment
-          SuperElastixFilter --|> SuperElastixFilterBase
-          SuperElastixFilter -down-o CommandlineApplication
-          SuperElastixFilter -down-o "Application using Default functionality"
-          @enduml
+      @startuml
+      
+      allow_mixing
+      
+      'style options 
+      skinparam monochrome true
+      skinparam circledCharacterRadius 0
+      skinparam circledCharacterFontSize 0
+      skinparam classAttributeIconSize 0
+      hide empty members
+      
+      class SuperElastixFilterCustomComponents< "<CompontentA<> ... CompontentZ<>>" > {
+        networkBuilderBase* m_NetworkBuilder = networkBuilder< CompontentA<>, ... , CompontentZ<> >
+      }
+      
+      class SuperElastixFilterBase {
+        "All ItkFilterMethods"
+      }
+      
+      class SuperElastixFilter {
+        networkBuilderBase* m_NetworkBuilder = networkBuilder< DefaultComponentList ...  >
+      }          
+      
+      usecase (Application that embeds\nSuperElastix with\ndefault functionality) as DefaultApplication
+      usecase (The SuperElastix\ncommandline\napplication) as CommandlineApplication
+      usecase (Component\nunit tests) as UnitTest
+      usecase (Third-party\nComponent\ndevelopment) as ThirdPartyComponentDevelopment
+      
+      SuperElastixFilterCustomComponents --|> SuperElastixFilterBase
+      SuperElastixFilterCustomComponents -down-o UnitTest
+      SuperElastixFilterCustomComponents -down-o ThirdPartyComponentDevelopment
+      SuperElastixFilter --|> SuperElastixFilterBase
+      SuperElastixFilter -down-o CommandlineApplication
+      SuperElastixFilter -down-o DefaultApplication
+      @enduml
           
 User Component Creation
 -----------------------
@@ -224,14 +174,15 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
 
 - The :code:`virtual bool MeetsCriterion( const CriterionType & criterion )`, which returns true if and only if the component has an implementation for which the criterion (read from the Blueprint) holds or can be fulfilled.
 
-.. ifconfig:: renderuml is 'False'
+.. figure:: rendered/plantuml-09ce2fd7f79d1feb48d70b21c89a4c9a9f686445.png
 
-    .. image:: rendered/plantuml-4cc137eef69ce9b76cba2a34c91faf1b684b1e5a.png
+    UML class inheritance diagram of a Component in SuperElastix
 
+    
 .. ifconfig:: renderuml is 'True'
     
     .. uml::
-    
+       
           @startuml
           
           'style options 
@@ -285,6 +236,7 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
           
           SuperElastixComponent <|-- CustomComponent 
           @enduml
+          
     
 .. code-block:: c++
     :caption: Layout of an example component of SuperElastix
@@ -338,16 +290,22 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
       virtual ~ExampleComponent();
 
       //For each Accepting Interface a Accept method must be implemented:
+	  // Accepting ExampleAInterface
       virtual int Accept( typename ExampleAInterface< Dimensionality >::Pointer ) override;
-
+	  
+	  // Accepting ExampleBInterface
       virtual int Accept( typename ExampleBInterface< TInternalComputationValue, Dimensionality >::Pointer ) override;
 
       // All methods in all Providing Interfaces must be implemented:
+	  // Providing ExampleCInterface
       virtual SomeImageType<PixelType, Dimensionality>* GetImage() override;
 
       //BaseClass methods
       virtual bool MeetsCriterion( const ComponentBase::CriterionType & criterion ) override;
 
+	  // Optional: The default implementation, which requires all Accepting interfaces to be connected, can be overridden
+	  // virtual bool ConnectionsSatisfied() override;
+	  
     private:
 
       // Typically a component stores the pointer to the Interfaces it accepts by Accept(), however 
@@ -476,10 +434,6 @@ The modules can specify on which of the other modules they depend, and the build
 Modules are enabled once, even when requested multiple times, and can be turned off and on via CMake.
 
 To add a module to SuperElastix, the developer creates a new directory and a CMake file that honor some naming conventions. The name of CMake file should Module[Name].cmake where [Name] is the name of the module. The CMake file contains a collection of CMake variables that the build system will use to integrate the module as component in the SuperElastixFilter. Users will never have to touch code outside module directory.
-
-.. ifconfig:: renderuml is 'False'
-
-    .. image:: rendered/plantuml-cd9981407af499c72a816f3b8562664e810087a7.png
     
 .. ifconfig:: renderuml is 'True'
     
@@ -579,3 +533,8 @@ To add a module to SuperElastix, the developer creates a new directory and a CMa
           
         
         @enduml
+
+.. figure:: rendered/plantuml-cd9981407af499c72a816f3b8562664e810087a7.png
+
+    Modules, Components and external projects
+

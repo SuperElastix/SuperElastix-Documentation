@@ -10,7 +10,8 @@ Commandline tool
 
 The SuperElastix commandline tool can be found at:
   
-- Windows: :code:`<build-path>\Applications-build\CommandLineInterface\[Release|Debug]\`
+- Windows: :code:`<build-path>\Applications-build\CommandLineInterface\[Release|Debug]\ `
+
 - Linux: :code:`<build-path>/Applications-build/CommandLineInterface/` 
 
 Demo Experiments

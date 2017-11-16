@@ -52,6 +52,7 @@ def setup(app):
         app.add_config_value('renderuml', 'False', 'env')
     else:
         app.add_config_value('renderuml', 'True', 'env')
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
