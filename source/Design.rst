@@ -98,10 +98,10 @@ Configuring the Network: Blueprints
 
 To configure an algorithmic network a Blueprint is passed to SuperElastix. 
 A blueprint contains the description of a full network or is a partial configuration. Hence, multiple Blueprints can be passed to SuperElastix which together form a full configuration.
-A full configuration defines a mathematical graph in terms of nodes: the "Component"-s, and edges: the "Connection"-s.
-Properties can be put at both the "Component"-s and the "Connection"-s.
-These properties are in the form of Key-Value pairs, where Keys and Values are strings or Values are lists of strings.
-The minimal required property for a Component is "Name": <Identifier>, with <Identifier> being any name in the form of a string. The minimal required properties for a Connection are "Out": <IdentifierA> and "In": <IdentifierB>, with the Identifiers refering to the Components it connects.
+A full configuration defines a mathematical graph in terms of nodes: the ``Component``-s, and edges: the ``Connection``-s.
+Properties can be put at both the ``Component``-s and the ``Connection``-s.
+These properties are in the form of ``Key-Value`` pairs, where ``Keys`` and ``Values`` are strings or ``Values`` are lists of strings.
+The minimal required property for a ``Component`` is ``"Name": <Identifier>``, with <Identifier> being any name in the form of a string. The minimal required properties for a ``Connection`` are ``"Out": <IdentifierA>`` and ``"In": <IdentifierB>``, with the Identifiers refering to the ``Components`` it connects.
 
 .. code-block:: javascript
     :caption: Layout of a Blueprint json-file
@@ -127,19 +127,31 @@ The minimal required property for a Component is "Name": <Identifier>, with <Ide
     }
     }
 
-Additional properties for a Component can be: 
+Additional properties for a ``Component`` can be: 
 
-- Classname (e.g. "NameOfClass" : "itkGradientDescentOptimizerv4Component")
-- A template parameter,  (e.g. "PixelType" : "double")
-- Settings (e.g. "NumberResolutionLevels" : "3" or "SmoothingSigmasPerLevel" : ["8", "4", "2"] )
+- Classname (e.g. ``"NameOfClass" : "itkGradientDescentOptimizerv4Component"``)
+- A template parameter,  (e.g. ``"PixelType" : "double"``)
+- Settings (e.g. ``"NumberOfLevels" : "3"`` or ``"SmoothingSigmasPerLevel" : ["8", "4", "2"]``)
 
-Additional properties for a Connection can be: 
+Additional properties for a ``Connection`` can be: 
 
-- Interface name (e.g. "NameOfInterface": "itkMetricv4Interface")
-- template parameter (e.g. "Dimensionality" : "3")
-- A tag (e.g. "Role" : "Fixed")
+- Interface name (e.g. ``"NameOfInterface": "itkMetricv4Interface"``)
+- template parameter (e.g. ``"Dimensionality" : "3"``)
+- A tag (e.g. ``"Role" : "Fixed"``)
 
-Once the Blueprint is parsed by SuperElastix the internal network builder tries to instantiate the appropriate components.  
+Given that the json file is valid and the blueprint meets the minimal required properties,
+SuperElastix has a flexible mechanism to parse all additional properties and to realize the algorithmic network without unnescarilly requiring a verbose configuration file and aimed at having a user-extendible database of components.
+Since initially each node in the graph can be any component in that is in SuperElastix its component database each property is considered an exclusion criterion.
+Additionally, the properties defined at a connection form exclusion criteria for both components involved.
+When all exclusion criteria are considered and for any node in the graph it cannnot be uniquely defined which component needs to be realized, SuperElastix will stop and report which component requires more or less criteria. 
+
+The advantages of this mechanism are: 
+
+- A user can select a component based on its connections (i.e. its role; what it can do) and doen't have to know the particular name of the class.
+- By extending SuperElastix with new components that have identical connections to existing components it will automatically ask the user to provide additional (discriminating) properties.
+- A user, for instance, does not need to specify "Dimensionality" : "3" for all components in the Blueprint if this can be deduced from one component in the network via its connections.
+- A partially defined Blueprint can leave certain properties open, such that these can be defined by an other partially configuring blueprint that are passed to SuperElastix additially.
+
         
 Generic handshake mechanism
 ---------------------------
