@@ -92,6 +92,55 @@ classes like metrics, transforms, optimizers, etc. Extended types of behavior (m
           Sink ..> Output
         @enduml
 
+
+Configuring the Network: Blueprints
+----------------------------------
+
+To configure an algorithmic network a Blueprint is passed to SuperElastix. 
+A blueprint contains the description of a full network or is a partial configuration. Hence, multiple Blueprints can be passed to SuperElastix which together form a full configuration.
+A full configuration defines a mathematical graph in terms of nodes: the "Component"-s, and edges: the "Connection"-s.
+Properties can be put at both the "Component"-s and the "Connection"-s.
+These properties are in the form of Key-Value pairs, where Keys and Values are strings or Values are lists of strings.
+The minimal required property for a Component is "Name": <Identifier>, with <Identifier> being any name in the form of a string. The minimal required properties for a Connection are "Out": <IdentifierA> and "In": <IdentifierB>, with the Identifiers refering to the Components it connects.
+
+.. code-block:: javascript
+    :caption: Layout of a Blueprint json-file
+
+    {
+    "Component": {
+        "Name": <Identifier>,
+        <PropertyKey1> : <PropertyValue1>,
+        ...
+        <PropertyKeyN> : <PropertyValueN>
+    }
+    "Component": {
+        ...
+    }
+    "Connection": {
+        "Out": <IdentifierA>,
+        "In": <IdentifierB>,
+        <PropertyKeyM> : <PropertyValueM>,
+        ...
+    }
+    "Connection": {
+        ...
+    }
+    }
+
+Additional properties for a Component can be: 
+
+- Classname (e.g. "NameOfClass" : "itkGradientDescentOptimizerv4Component")
+- A template parameter,  (e.g. "PixelType" : "double")
+- Settings (e.g. "NumberResolutionLevels" : "3" or "SmoothingSigmasPerLevel" : ["8", "4", "2"] )
+
+Additional properties for a Connection can be: 
+
+- Interface name (e.g. "NameOfInterface": "itkMetricv4Interface")
+- template parameter (e.g. "Dimensionality" : "3")
+- A tag (e.g. "Role" : "Fixed")
+
+Once the Blueprint is parsed by SuperElastix the internal network builder tries to instantiate the appropriate components.  
+        
 Generic handshake mechanism
 ---------------------------
         
