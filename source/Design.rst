@@ -9,7 +9,7 @@ Network of components
 ---------------------
 
 A classical approach for a registration toolbox is to use an object-oriented design that decomposes the registration problem into
-classes like metrics, transforms, optimizers, etc. Extended types of behavior (mutual information, affine transform, etc) can be implemented via subtyping. Such a decomposition, however, might not be adequate to handle all of the diversity in existing registration paradigms. And, even within the same paradigm existing toolboxes have slighly different decomposions. Unification of registration methods by refactoring existing toolboxes into one object-oriented design is a tremendous amount of work, if possible at all. Additionally, an object-oriented design typically poses a rather rigid layout how e.g. an optimizer interacts with a metric and a tranforms. Within the large variety of paradigms, there seems to be little consensus to a standard organization. The design of SuperElastix, therefore, takes a different approach. A registration algorithm is considered to be a network of functional components. The network layout (i.e. amount of nodes and connections) is user configurable and the components (i.e. the nodes) are treated uniformely. In our framework each component formalizes its interfaces that determines whether components can connect. Components can have diverse functionalities such of mutual information, affine transform, or a full registration pipeline, but all have a generic mechanism to perform a handshake. 
+classes like metrics, transforms, optimizers, etc. Extended types of behavior (mutual information, affine transform, etc) can be implemented via subtyping. Such a decomposition, however, might not be adequate to handle all of the diversity in existing registration paradigms. And, even within the same paradigm existing toolboxes have slighly different decomposions. Unification of registration methods by refactoring existing toolboxes into one object-oriented design is a tremendous amount of work, if possible at all. Additionally, an object-oriented design typically poses a rather rigid layout how e.g. an optimizer interacts with a metric and a tranforms. Within the large variety of paradigms, there seems to be little consensus to a standard organization. The design of SuperElastix, therefore, takes a different approach. A registration algorithm is considered to be a network of functional components. The network layout (i.e. amount of nodes and connections) is user configurable and the components (i.e. the nodes) are treated uniformely. In our framework each component formalizes its interfaces that determines whether components can connect. Components can have diverse functionalities such as mutual information, affine transform, or a full registration pipeline, but all have a generic mechanism to perform a handshake. 
 
 .. figure:: rendered/plantuml-f486c5a4288c3031a13f4bb7e22e0ebf57b0aee3.png
 
@@ -100,7 +100,7 @@ To configure an algorithmic network a Blueprint is passed to SuperElastix.
 A blueprint contains the description of a full network or is a partial configuration. Hence, multiple Blueprints can be passed to SuperElastix which together form a full configuration.
 A full configuration defines a mathematical graph in terms of nodes: the ``Component``-s, and edges: the ``Connection``-s.
 Properties can be put at both the ``Component``-s and the ``Connection``-s.
-These properties are in the form of ``Key-Value`` pairs, where ``Keys`` and ``Values`` are strings or ``Values`` are lists of strings.
+These properties are in the form of ``Key: Value`` pairs, where Keys and Values are strings or Values are lists of strings.
 The minimal required property for a ``Component`` is ``"Name": <Identifier>``, with <Identifier> being any name in the form of a string. The minimal required properties for a ``Connection`` are ``"Out": <IdentifierA>`` and ``"In": <IdentifierB>``, with the Identifiers refering to the ``Components`` it connects.
 
 .. code-block:: javascript
@@ -141,7 +141,7 @@ Additional properties for a ``Connection`` can be:
 
 Given that the json file is valid and the blueprint meets the minimal required properties,
 SuperElastix has a flexible mechanism to parse all additional properties and to realize the algorithmic network without unnescarilly requiring a verbose configuration file and aimed at having a user-extendible database of components.
-Since initially each node in the graph can be any component in that is in SuperElastix its component database each property is considered an exclusion criterion.
+Since, initially, each node in the graph can be any component that is in the component database of SuperElastix, each property is considered an exclusion criterion.
 Additionally, the properties defined at a connection form exclusion criteria for both components involved.
 When all exclusion criteria are considered and for any node in the graph it cannnot be uniquely defined which component needs to be realized, SuperElastix will stop and report which component requires more or less criteria. 
 
@@ -150,7 +150,7 @@ The advantages of this mechanism are:
 - A user can select a component based on its connections (i.e. its role; what it can do) and doen't have to know the particular name of the class.
 - By extending SuperElastix with new components that have identical connections to existing components it will automatically ask the user to provide additional (discriminating) properties.
 - A user, for instance, does not need to specify "Dimensionality" : "3" for all components in the Blueprint if this can be deduced from one component in the network via its connections.
-- A partially defined Blueprint can leave certain properties open, such that these can be defined by an other partially configuring blueprint that are passed to SuperElastix additially.
+- A partially defined Blueprint can leave certain properties open, such that these can be defined by an other partially configuring blueprint that is passed to SuperElastix additionally.
 
         
 Generic handshake mechanism
