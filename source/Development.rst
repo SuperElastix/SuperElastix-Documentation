@@ -434,6 +434,11 @@ The modules can specify on which of the other modules they depend, and the build
 Modules are enabled once, even when requested multiple times, and can be turned off and on via CMake.
 
 To add a module to SuperElastix, the developer creates a new directory and a CMake file that honor some naming conventions. The name of CMake file should Module[Name].cmake where [Name] is the name of the module. The CMake file contains a collection of CMake variables that the build system will use to integrate the module as component in the SuperElastixFilter. Users will never have to touch code outside module directory.
+
+.. figure:: rendered/plantuml-cd9981407af499c72a816f3b8562664e810087a7.png
+
+    Modules, Components and external projects
+
     
 .. ifconfig:: renderuml is 'True'
     
@@ -533,8 +538,3 @@ To add a module to SuperElastix, the developer creates a new directory and a CMa
           
         
         @enduml
-
-.. figure:: rendered/plantuml-cd9981407af499c72a816f3b8562664e810087a7.png
-
-    Modules, Components and external projects
-
