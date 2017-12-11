@@ -93,8 +93,10 @@ classes like metrics, transforms, optimizers, etc. Extended types of behavior (m
         @enduml
 
 
+.. _design_configuring:
+
 Configuring the Network: Blueprints
-----------------------------------
+-----------------------------------
 
 To configure an algorithmic network a Blueprint is passed to SuperElastix. 
 A blueprint contains the description of a full network or is a partial configuration. Hence, multiple Blueprints can be passed to SuperElastix which together form a full configuration.

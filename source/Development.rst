@@ -381,6 +381,12 @@ By inheriting from the :code:`SuperElastixComponent` class the component develop
         };
       }
     };
+
+MeetsCriterion
+~~~~~~~~~~~~~~
+
+Each Component needs to implement its ``MeetsCriterion`` method. The primary task of this method is to let the network builder select the right component based on the properties the user defined in the blueprint, as described in the section :ref:`design_configuring`. The network builder does this by passing one property key-value pair at the time to the component, which replies if it accepts the property key and if so whether it accepts the property value. To handle the properties that are template parameters, e.g. ``"PixelType" : "double"``, SuperElastix has the convience function ``CheckTemplateProperties``. The handling of all other properties needs to be implemented explicitly. In this lies also the secondary task of ``MeetsCriterion``, that is, storing or using each property key-value pair that is a parameter setting of the component, such as ``"NumberOfLevels" : "3"`` or ``"SmoothingSigmasPerLevel" : ["8", "4", "2"]``.
+
     
 Cmake module selection system
 -----------------------------
