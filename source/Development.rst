@@ -34,7 +34,7 @@ To stay as close as possible to the itk philosophy, the SuperElastixFilter suppo
     superElastixFilter->SetInput( "FixedImage", reader->GetOutput());
     // The output of superElastixFilter needs to be made of OutputImageType explicitly.
     writer->SetInput(superElastixFilter->GetOutput<OutputImageType>( "ResultImage" ));
-    // Assume blueprint was instantiated. It is requered that the blueprint defines the a source 
+    // Assume blueprint was instantiated. It is required that the blueprint defines the a source 
     // component the named "FixedImage" that corresponds to the InputImageType. This holds 
     // for the sink component "ResultImage" and OutputImageType. 
     superElastixFilter->SetBlueprint(blueprint);
