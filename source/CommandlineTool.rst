@@ -1,14 +1,11 @@
-.. _Usage:
-
-Usage
-===============
-
-This page explains how to use SuperElastix.
+.. _CommandlineTool:
 
 Commandline tool
-----------------
+================
 
-The SuperElastix commandline tool can be found at:
+This page explains how to use the SuperElastix executable.
+The executable of the latest release can be downloaded from `GitHub releases <https://github.com/SuperElastix/SuperElastix/releases>`_.
+Or, if build from souces, it can be found at:
   
 - Windows: :code:`<build-path>\Applications-build\CommandLineInterface\[Release|Debug]\ `
 

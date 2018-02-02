@@ -9,8 +9,9 @@ Contents:
 
 .. toctree:: 
     GettingStarted
-    Usage
+    CommandlineTool
     Design
-    Development
+    LibraryUsage
+    UserComponentCreation
     Toolboxes
     Dashboard
