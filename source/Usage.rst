@@ -14,6 +14,25 @@ The SuperElastix commandline tool can be found at:
 
 - Linux: :code:`<build-path>/Applications-build/CommandLineInterface/` 
 
+
+By calling :code:`SuperElastix --help` its options are shown.
+
+::
+
+  Allowed options:
+    --help                produce help message
+    --conf arg            Configuration file: single or multiple Blueprints 
+                          [.xml|.json]
+    --in arg              Input data: images, labels, meshes, etc. Usage arg: 
+                          <name>=<path> (or multiple pairs)
+    --out arg             Output data: images, labels, meshes, etc. Usage arg: 
+                          <name>=<path> (or multiple pairs)
+    --graphout arg        Output Graphviz dot file
+    --logfile arg         Log output file
+    --loglevel arg        Log level [off|critical|error|warning|info|debug|trace]
+
+The file format of a Blueprint is described in :ref:`design_configuring`, where the :code:`<name>`-s of the :code:`--in` and :code:`--out` arguments must correspond to the sinking and sourcing component identifier names as defined in the Blueprint, respectively.
+
 Demo Experiments
 ----------------
 
