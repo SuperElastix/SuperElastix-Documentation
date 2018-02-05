@@ -5,10 +5,10 @@ User Component Creation
 
 This is a quick overview how to add you own registration components to SuperElastix.
 
-Build SuperElastix locally:
+Test if you can build SuperElastix locally:
 
 - git clone github.com/SuperElastix/SuperElastix (to contribute consider `forking <https://guides.github.com/activities/forking/>`_ first)
-- use cmake with our SuperBuild to get and build all external dependencies automatically, see GettingStarted_.
+- use cmake with our SuperBuild to get and build all external dependencies automatically, see :ref:`GettingStarted`.
 
 To create a new component:
 
