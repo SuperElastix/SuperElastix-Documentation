@@ -54,7 +54,7 @@ Or, if SuperElastix was build from sources, follow these instructions to setup t
 - Linux: 
 
   - change dir to :code:`<build-path>/Applications-build/`
-  - :code:`make Demo`
+  - :code:`make demo`
 
-By building the :code:`Demo` target the SuperElastix executable, image data, configuration files and commandline scripts will be copied to the :code:`<DEMO_PREFIX>` directory. The :code:`<DEMO_PREFIX>` can be set by CMake and defaults to :code:`<build-path>/SuperElastixApplications-build/Demo`.
+By building the :code:`demo` target the SuperElastix executable, image data, configuration files and commandline scripts will be copied to the :code:`<DEMO_PREFIX>` directory. The :code:`<DEMO_PREFIX>` can be set by CMake and defaults to :code:`<build-path>/SuperElastixApplications-build/Demo`.
 
