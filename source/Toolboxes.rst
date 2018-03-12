@@ -52,7 +52,9 @@ This page lists the tools that are embedded in SuperElastix or are considered to
     +------------------------+------------------------------------------------------------------------------+------------------------------------------------------------------------------+ 
     | MIRORR                 | Multimodal Image Registration using blOck-matching and Robust Regression     | http://aehrc.github.io/Mirorr/                                               | 
     +------------------------+------------------------------------------------------------------------------+------------------------------------------------------------------------------+ 
-                                                                                                                                                                                             
+    | BRAINSTools/BRAINSFit  | A suite of tools for medical image processing focused on brain analysis      | https://github.com/BRAINSia/BRAINSTools/tree/master/BRAINSFit                | 
+    +------------------------+------------------------------------------------------------------------------+------------------------------------------------------------------------------+ 
+                                                
 .. _table-incompatible:                                                                                                                                                                      
                                                                                                                                                                                              
 .. table:: Incompatible/Unclassified Toolboxes.                                                                                                                                              
