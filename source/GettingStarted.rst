@@ -53,14 +53,13 @@ In this guide we will use CMake to generate build files and the Visual Studio co
 
 2. Select compiler.
     - Press configure to bring up the compiler selection window.
-    - Preferably, choose Visual Studio 12 2013 Win64 as the generator for the project. SuperElastix can only be compiled with Visual Studio 12 or later, and if the OS is 64-bit that is also the prefered for the compiler. 
+    - SuperElastix can only be compiled with Visual Studio 14 2015 or later, and is tested for 64-bit compilation only.
 
 3. Open Visual Studio, select File -> Open Project/Solution -> Open and choose :code:`SuperElastixSuperBuild` solution.
 
 4. Make sure "Release" build type is selected and build the :code:`ALL_BUILD` project.
 
 5. Right-click on :code:`ALL_BUILD` and click :code:`Build`.
-    - When building in Visual Studio 2015 you will get a number of error messages during compilation of ITK. Just press the 'Ignore' button for all of them.
 
 6. The SuperBuildSuperElastix solution only shows each library as a project. To have a more detailed view of SuperElastix open the SuperElastix solution file  :code:`<build-path>\SuperElastix-build\SuperElastix.sln` in a new Visual Studio environment.
 
