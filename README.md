@@ -5,9 +5,14 @@ This is the source code for the project documentation at [superelastix.readthedo
 
 ```bash
 $ pip install sphinx
+$ pip install sphinx_rtd_theme
+$ pip install --upgrade setuptools
+$ pip install sphinxcontrib-plantuml
 ```
 
-and run the following make command:
+Then place `plantuml.jar`, which can be downloaded from http://plantuml.com/download, in the `utils/` directory and make sure you have java installed.
+
+Then run the following make command (in the root directory, containing Makefile and make.bat):
 
 ```bash
 $ make html
@@ -19,7 +24,6 @@ The docs will be generated and the output files will be placed in the `build/htm
 $ make html renderuml
 ```
 
-This requires `plantuml.jar`, which can be downloaded from http://plantuml.com/download, to be in the `utils/` directory and java being installed.
 The documentation can be automatically generated whenever a file changes (useful for development) using `sphinx-autobuild`:
 
 ```bash
