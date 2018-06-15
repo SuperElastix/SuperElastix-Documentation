@@ -67,6 +67,9 @@ In this guide we will use CMake to generate build files and the Visual Studio co
 
 8. The SuperElastix commandline executable can be found in :code:`<build-path>\SuperElastixApplications-build\CommandlineProgram\Release`.
 
+.. warning::
+
+    A Visual Studio Debug build appears to get link errors, on both VS2015 and VS2017 (Version 15.7.1). Typical error message: :code:`fatal error LNK1318: Unexpected PDB error; OK (0) ''`. However, a Release build should work fine. We will soon present a workaround here.
 
 
 Manually Building the Required Libraries
