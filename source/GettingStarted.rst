@@ -69,7 +69,13 @@ In this guide we will use CMake to generate build files and the Visual Studio co
 
 .. warning::
 
-    A Visual Studio Debug build appears to get link errors, on both VS2015 and VS2017 (Version 15.7.1). Typical error message: :code:`fatal error LNK1318: Unexpected PDB error; OK (0) ''`. However, a Release build should work fine. We will soon present a workaround here.
+    A Visual Studio Debug build appears to get link errors, on both VS2015 and VS2017 (Version 15.7.1). Typical error message: :code:`fatal error LNK1318: Unexpected PDB error; OK (0) ''`. However, a Release build should work fine. As a workaround, you may temporarily build a subset of the components, as described down here.
+
+
+Building a Subset of Components
+-------------------------------
+
+SuperElastix allows building a subset of components, by removing some of the components from "selxCompiledLibraryComponents.h". This file is placed in :code:`<build-path>\SuperElastix-build` during the CMake generate step. Doing so may speed up compilation, and it may also work around some linker limitations (as encountered on Windows Visual Studio Debug builds, described above here). You may place your modified copy of "selxCompiledLibraryComponents.h" elsewhere, and specify its directory path by CMake flag COMPILED_LIBRARY_CONFIG_DIR.
 
 
 Manually Building the Required Libraries
