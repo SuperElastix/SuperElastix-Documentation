@@ -107,7 +107,6 @@ The minimal required property for a ``Component`` is ``"Name": <Identifier>``, w
 
 .. code-block:: javascript
     :caption: Layout of a Blueprint json-file
-
     {
     "Component": {
         "Name": <Identifier>,
